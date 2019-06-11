@@ -100,10 +100,10 @@ private:
   const int GRID_Y_SIZE_;
   const int GRID_Z_SIZE_;
   const int RPN_INPUT_SIZE_;
-  const int NUM_ANCHOR_X_INDS_;
-  const int NUM_ANCHOR_Y_INDS_;
-  const int NUM_ANCHOR_R_INDS_;
-  const int NUM_ANCHOR_;
+  const unsigned int NUM_ANCHOR_X_INDS_;
+  const unsigned int NUM_ANCHOR_Y_INDS_;
+  const unsigned int NUM_ANCHOR_R_INDS_;
+  const unsigned int NUM_ANCHOR_;
   const int RPN_BOX_OUTPUT_SIZE_;
   const int RPN_CLS_OUTPUT_SIZE_;
   const int RPN_DIR_OUTPUT_SIZE_;

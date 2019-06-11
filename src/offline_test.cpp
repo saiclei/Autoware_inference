@@ -34,9 +34,12 @@
 #include <iterator>
 #include <algorithm>
 
+
 const int NUM_POINT_FEATURE_ = 4;
 const float NORMALIZING_INTENSITY_VALUE_ = 255.0f;
 const float offset_z = 0.0f;
+const int n_zero = 6;
+
 
 template<class T>
 std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
@@ -58,6 +61,41 @@ void pclToArray(const pcl::PointCloud<pcl::PointXYZI>::Ptr& in_pcl_pc_ptr, float
   }
 }
 
+void performPP(std::unique_ptr<PointPillars> point_pillars_ptr_, 
+                pcl::PointCloud<pcl::PointXYZI>::Ptr pcl_pc_ptr) {
+    // Read test file 000003.pcd
+    for (int i = 0; i <= 20; ++i) {
+        std::string old_string = std::to_string(i);
+        std::string new_string = std::string(n_zero - old_string.length(), '0') + old_string;
+        std::string pcl_file = "/home/saiclei/Research/Codes/kitti-pcl/src/build/" + new_string + ".pcd";
+
+        if (pcl::io::loadPCDFile<pcl::PointXYZI>(pcl_file, 
+                                                   *pcl_pc_ptr) == -1) {
+            PCL_ERROR("Couldn't read file %s.pcd. \n", new_string);
+            return;
+        }
+
+        std::cout << "Loaded " << pcl_pc_ptr->width * pcl_pc_ptr->height
+                               << " data points\n ";
+
+        std::cout << "The size is: " << pcl_pc_ptr->size() << '\n';
+        float* points_array = new float[pcl_pc_ptr->size() * NUM_POINT_FEATURE_];
+
+        pclToArray(pcl_pc_ptr, points_array, offset_z);
+        std::vector<float> out_detection;
+
+        auto start = std::chrono::high_resolution_clock::now();
+        point_pillars_ptr_->doInference(points_array, pcl_pc_ptr->size(), out_detection);
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = finish - start;
+        std::cout << "Elapsed time is: " << elapsed.count() << " s\n";
+
+        std::cout << "The size of out_detection is: " << out_detection.size() << std::endl; 
+        //std::cout << out_detection << std::endl; 
+        delete[] points_array;
+    }
+}
+
 int main() {
     std::unique_ptr<PointPillars> point_pillars_ptr_;
     std::unique_ptr<PreprocessPoints> preprocess_points_ptr_;
@@ -65,11 +103,20 @@ int main() {
     bool reproduce_result_mode=false;
     float score_threshold = 0.5;
     float nms_overlap_threshold = 0.5;
+   
+    
     std::string pfe_onnx_file = 
             "/mnt/raid1/Research/Autoware_inference/kitti_pretrained_point_pillars/pfe.onnx";
     std::string rpn_onnx_file = 
             "/mnt/raid1/Research/Autoware_inference/kitti_pretrained_point_pillars/rpn.onnx";
+   
+    /*
+    std::string pfe_onnx_file = 
+            "/home/saiclei/Downloads/ped_pfe.onnx";
+    std::string rpn_onnx_file = 
+            "/home/saiclei/Downloads/ped_rpn.onnx";
 
+   */
 
 
     point_pillars_ptr_.reset(new PointPillars(reproduce_result_mode, 
@@ -80,30 +127,6 @@ int main() {
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr pcl_pc_ptr(new pcl::PointCloud<pcl::PointXYZI>);
 
-    // Read test file 000003.pcd
-    if (pcl::io::loadPCDFile<pcl::PointXYZI>("/home/saiclei/Research/Codes/kitti-pcl/src/build/000003.pcd", 
-                                               *pcl_pc_ptr) == -1) {
-        PCL_ERROR("Couldn't read file 000003.pcd. \n");
-        return -1;
-    }
-
-    std::cout << "Loaded " << pcl_pc_ptr->width * pcl_pc_ptr->height
-                           << " data points\n ";
-
-    std::cout << "The size is: " << pcl_pc_ptr->size() << '\n';
-    float* points_array = new float[pcl_pc_ptr->size() * NUM_POINT_FEATURE_];
-
-    pclToArray(pcl_pc_ptr, points_array, offset_z);
-    std::vector<float> out_detection;
-
-    auto start = std::chrono::high_resolution_clock::now();
-    point_pillars_ptr_->doInference(points_array, pcl_pc_ptr->size(), out_detection);
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = finish - start;
-    std::cout << "Elapsed time is: " << elapsed.count() << " s\n";
-  
-    std::cout << "The sizez of out_detection is: " << out_detection.size() << std::endl; 
-    std::cout << out_detection << std::endl; 
-    delete[] points_array;
-
+    performPP(std::move(point_pillars_ptr_), pcl_pc_ptr);
+    
 }

@@ -46,20 +46,20 @@ PointPillars::PointPillars(const bool reproduce_result_mode, const float score_t
   , RPN_DIR_OUTPUT_SIZE_(NUM_ANCHOR_ * 2)
   , PILLAR_X_SIZE_(0.16f)
   , PILLAR_Y_SIZE_(0.16f)
-  , PILLAR_Z_SIZE_(4.0f)
+  , PILLAR_Z_SIZE_(4.0f)        //4.0
   , MIN_X_RANGE_(0.0f)
-  , MIN_Y_RANGE_(-39.68f)
+  , MIN_Y_RANGE_(-39.68f)       //-19.84
   , MIN_Z_RANGE_(-3.0f)
-  , MAX_X_RANGE_(69.12f)
-  , MAX_Y_RANGE_(39.68f)
+  , MAX_X_RANGE_(69.12f)        //47.36
+  , MAX_Y_RANGE_(39.68f)        //19.84
   , MAX_Z_RANGE_(1)
   , BATCH_SIZE_(1)
   , NUM_INDS_FOR_SCAN_(512)
   , NUM_THREADS_(64) // if you change NUM_THREADS_, need to modify NUM_THREADS_MACRO in common.h
   , SENSOR_HEIGHT_(1.73f)
-  , ANCHOR_DX_SIZE_(1.6f)
-  , ANCHOR_DY_SIZE_(3.9f)
-  , ANCHOR_DZ_SIZE_(1.56f)
+  , ANCHOR_DX_SIZE_(0.6f)       //1.6
+  , ANCHOR_DY_SIZE_(0.8f)       //3.9
+  , ANCHOR_DZ_SIZE_(1.73f)      //1.56
   , NUM_BOX_CORNERS_(4)
   , NUM_OUTPUT_BOX_FEATURE_(7)
 {

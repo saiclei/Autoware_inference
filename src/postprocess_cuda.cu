@@ -202,7 +202,7 @@ void PostprocessCuda::doPostprocessCuda(const float* rpn_box_output, const float
   int host_filtered_dir[host_filter_count[0]];
   GPU_CHECK( cudaMemcpy(host_filtered_box, dev_sorted_filtered_box, NUM_OUTPUT_BOX_FEATURE_*host_filter_count[0] *sizeof(float), cudaMemcpyDeviceToHost ) );
   GPU_CHECK( cudaMemcpy(host_filtered_dir, dev_sorted_filtered_dir,                        host_filter_count[0] *sizeof(int), cudaMemcpyDeviceToHost ) );
-  for (size_t i = 0; i < out_num_objects; i++)
+  for (int i = 0; i < out_num_objects; i++)
   {
     out_detection.push_back(host_filtered_box[keep_inds[i]*NUM_OUTPUT_BOX_FEATURE_+0]);
     out_detection.push_back(host_filtered_box[keep_inds[i]*NUM_OUTPUT_BOX_FEATURE_+1]);

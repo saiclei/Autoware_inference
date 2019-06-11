@@ -1,8 +1,13 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(OFFLINE_TEST_PP LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+project(OFFLINE_TEST_PP VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#add_compile_options(-std=c++11)
+
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")    # append -std=c++11
+#message(STATUS, "CXXFLAGS: ${CMAKE_CXX_FLAGS}")    # It appears that this covers nvcc options
 
 find_package(PCL 1.8 REQUIRED COMPONENTS common io)
 
@@ -65,25 +70,35 @@ else()
 endif()
 
 
-include_directories(${PCL_INCLUDE_DIRS}
-                    ${TRT_INC_DIR}
-                    /mnt/raid1/Research/Autoware_inference/
-                    /usr/local/cuda/include)
-
 set(SOURCE_FILES
     src/offline_test.cpp 
     src/point_pillars.cpp
     src/preprocess_points.cpp)
 
+add_executable(offline_test_pp ${SOURCE_FILES})
+include_directories(${PCL_INCLUDE_DIRS}
+                    ${TRT_INC_DIR}
+                    /mnt/raid1/Research/Autoware_inference/
+                    /usr/local/cuda/include)
+
+# Using modern cmake
+# By default, its appended
+#target_include_directories(offline_test_pp
+#                    ${PCL_INCLUDE_DIRS}
+#                    ${TRT_INC_DIR}
+#                    /mnt/raid1/Research/Autoware_inference/
+#                    /usr/local/cuda/include)
+
 
 set_directory_properties( PROPERTIES COMPILE_DEFINITIONS "" )
+
 cuda_add_library(gpu_point_pillars_lib 
          src/preprocess_points_cuda.cu
          src/anchor_mask_cuda.cu
          src/scatter_cuda.cu
          src/postprocess_cuda.cu
          src/nms_cuda.cu
-         #         OPTIONS -arch sm_70
+         OPTIONS -arch sm_70 -std=c++11
         )
 
 target_link_libraries(gpu_point_pillars_lib
@@ -98,7 +113,6 @@ link_directories(${PCL_LIBRARY_DIRS}
 add_definitions(${PCL_DEFINITIONS})
 
 
-add_executable(offline_test_pp ${SOURCE_FILES})
 
 target_link_libraries(offline_test_pp ${PCL_LIBRARIES} 
                                       ${CUDA_LIBRARIES} 
